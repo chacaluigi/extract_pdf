@@ -1,6 +1,8 @@
 # Entorno virtual
 pdf_env/
+venv/
 .env
+*/.env
 
 # Archivos de Python
 __pycache__/
