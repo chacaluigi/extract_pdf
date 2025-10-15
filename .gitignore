@@ -1,5 +1,5 @@
 # Entorno virtual
-venv/
+pdf_env/
 .env
 
 # Archivos de Python
