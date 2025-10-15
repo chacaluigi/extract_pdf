@@ -1,11 +1,21 @@
 import pdfplumber
 
-def extract_pdf_pdfplumber(pdf_file, start=0, end=None):
+def extract_pdf_pdfplumber(pdf_file):
     with pdfplumber.open(pdf_file) as pdf:
     
-        total_pages=len(pdf.pages)
+        page=pdf.pages[1]
+        area=page.crop((0, 0.15*float(page.height), page.width, 0.95*float(page.height)))
+        im=area.to_image(resolution=150)
+        im.save("area.png", format="PNG")
+        
+    return area
 
-        if end is None or end>total_pages:
+salida=extract_pdf_pdfplumber("data/raw/2019-10-20-Elecciones-Generales-Cochabamba.pdf")
+print(salida)
+
+
+
+""" if end is None or end>total_pages:
             end=total_pages
 
         if start<0 or start>=total_pages:
@@ -16,20 +26,7 @@ def extract_pdf_pdfplumber(pdf_file, start=0, end=None):
         
         for page_num in range(start, end):
             page=pdf.pages[page_num]
-            table=page.extract_table()
-    return table
-
-salida=extract_pdf_pdfplumber("src/pdfs/JURADOS+ELECTORALES+COCHABAMBA+2025.pdf", 0,5)
-print(salida)
-
-
-#area=page.crop((0, 0.15*float(page.height), page.width, 0.95*float(page.height)))
-        #im=area.to_image(resolution=150)
-        #im.save("area.png", format="PNG")
-
-
-
-
+            table=page.extract_table() """
 
 
 

@@ -10,7 +10,8 @@ PROYECTO DE EXTRACCIÓN DE PDFS
 # extraer tablas del pdf que subiste (ruta proporcionada por ti):
 python -m src.extract_tables data/raw/2019-10-20-Elecciones-Generales-Cochabamba.pdf 1-3 lattice
 
-
+# limpiar una tabla extraída
+python -m src.clean_data data/extracted/2019-10-20-Elecciones-Generales-Cochabamba_table1.csv data/raw/2019-10-20-Elecciones-Generales-Cochabamba.pdf
 
 
 Package            Version
@@ -25,3 +26,8 @@ pip                24.0
 pycparser          2.23
 PyPDF2             3.0.1
 pypdfium2          4.30.0
+
+
+modificar la función de extract_pdf_tables:
+- unir las tablas encontradas de un pdf, en un solo archivo csv, ya que, las tablas de un pdf tienen el mismo encabezado y formato en todas sus páginas. Además que los pdfs tienen cientos de páginas con tablas.
+

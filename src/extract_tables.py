@@ -16,7 +16,7 @@ def extract_pdf_tables(pdf_path: str, output_dir: str = None, pages="all", flavo
 
     print(f"Extrayendo tablas de {pdf_path} -> flavor={flavor}, pages={pages}")
     # Camelot: flavor='lattice' para tablas con líneas; 'stream' para tablas por espacios
-    tables = camelot.read_pdf(str(pdf_path), pages=pages, flavor=flavor)
+    tables = camelot.read_pdf(str(pdf_path), pages=pages, flavor=flavor, split_text=True)
     print(f"Tablas encontradas: {len(tables)}")
 
     csv_paths = []
