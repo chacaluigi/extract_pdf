@@ -8,7 +8,7 @@ def ensure_dir(p):
     Path(p).mkdir(parents=True, exist_ok=True)
 
 def get_pdf_date(pdf_path: str):
-    """Intenta obtener la fecha de creación del PDF desde metadata.
+    """Intentar obtener la fecha de creación del PDF desde metadata.
     Si no está, devuelve None (se puede luego usar la fecha en el filename)."""
     try:
         reader = PdfReader(pdf_path)

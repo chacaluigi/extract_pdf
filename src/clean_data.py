@@ -1,75 +1,118 @@
-# src/clean_data.py
 import pandas as pd
 from pathlib import Path
 from src.utils import ensure_dir, normalize_ci, normalize_name, parse_date_from_filename
+import sys
 
 CLEAN_DIR = Path(__file__).resolve().parents[1] / "data" / "cleaned"
+DATA_BOL_DIR = Path(__file__).parent.parent
+sys.path.insert(0, str(DATA_BOL_DIR))
 
-def process_data(df):
+from data.dictionary.data_bolivia import BoliviaData
+nombres_bolivia = BoliviaData.NOMBRES
+
+def clear_ci_document(df):
     processed_df=df.copy()
-    processed_df["DOCUMENTO"]=processed_df['DOCUMENTO'].str.replace(r'^[I\-]\s*','', regex=True)
+    processed_df["DOCUMENTO"]=processed_df['DOCUMENTO'].str.replace(r'^I\-\s*','', regex=True)
+    return processed_df
+
+def separate_last_and_first_names(text):
+
+    if pd.isna(text):
+        return pd.Series(['','',''])
+    
+    parts=str(text).strip().split()
+
+    if len(parts) < 2:
+        print(f'ERROR: EXTRACCIÓN NOMBRE INCORRECTO. El nombre {text} no puede ser menos de 2 palabras.')
+        return pd.Series([text, '', ''])
+    
+    conectors={'de', 'del', 'la', 'tezanos'}
+    processed_parts = []
+    i=0
+    while i<len(parts):
+        current_part=parts[i]
+
+        if current_part.lower() in conectors and parts[i+1].lower() in conectors and i+2 < len(parts):
+            combined = f"{current_part} {parts[i+1]} {parts[i+2]}"
+            processed_parts.append(combined)
+            i+=3
+        elif current_part.lower() in conectors and i+1<len(parts):
+            combined = f"{current_part} {parts[i+1]}"
+            processed_parts.append(combined)
+            i+=2
+        else:
+            processed_parts.append(current_part)
+            i+=1
+    
+    parts=processed_parts
+
+    if len(parts) == 2:
+        pat_surname=''
+        mat_surname=parts[0]
+        names=parts[1]
+
+    elif len(parts) == 3:
+        if parts[1] in nombres_bolivia:
+            pat_surname=""
+            mat_surname=parts[0]
+            names=f'{parts[1]} {parts[2]}'
+        else:
+            pat_surname=parts[0]
+            mat_surname=parts[1]
+            names=parts[2]
+    else:
+        pat_surname=parts[0]
+        mat_surname=parts[1]
+        names = ' '.join(parts[2:])
+    
+    return pd.Series([pat_surname, mat_surname, names])
 
 def clean_csv(input_csv: str, output_csv: str = None, source_pdf=None, pdf_date=None):
+    
     ensure_dir(CLEAN_DIR)
     df = pd.read_csv(input_csv, dtype=str, keep_default_na=False)
-    # Normalizar columnas: tratar de asignar columnas comunes
-    # Ejemplo asumiendo columnas como ["NRO","APELLIDOS","NOMBRES","TIPO DOCUMENTO","NRO. DOCUMENTO", ...]
-    # Normalizar nombres de columnas a minúsculas sin espacios
-    colmap = {c: c.strip().lower().replace(' ', '_') for c in df.columns}
-    df.rename(columns=colmap, inplace=True)
+    df = clear_ci_document(df)
 
-    # Intentos de identificar columnas relevantes:
-    possible_ci_cols = [c for c in df.columns if 'doc' in c or 'documento' in c or 'nro' in c or 'dni' in c]
-    possible_name_cols = [c for c in df.columns if 'nombre' in c or 'apellidos' in c or 'apell' in c]
+    if 'APELLIDOS Y NOMBRES' in df.columns:
+        nombre_split = df['APELLIDOS Y NOMBRES'].apply(separate_last_and_first_names)
+        df[['APELLIDO_PATERNO', 'APELLIDO_MATERNO', 'NOMBRES']] = nombre_split
 
-    # Construir dataframe canónico
-    canonical = pd.DataFrame()
-    # Column: ci
-    if possible_ci_cols:
-        canonical['ci'] = df[possible_ci_cols[0]].apply(normalize_ci)
-    else:
-        canonical['ci'] = ''
+    if source_pdf:
+        df['FUENTE_PDF'] = source_pdf
+    
+    if pdf_date:
+        df['FECHA_PDF'] = pdf_date
+    elif source_pdf:
+        extracted_date = parse_date_from_filename(source_pdf)
+        if extracted_date:
+            df['FECHA_PDF'] = extracted_date
 
-    # Nombres completos
-    # intenta combinar apellido + nombre si existen
-    apellido_cols = [c for c in df.columns if 'apell' in c]
-    nombre_cols = [c for c in df.columns if 'nombre' in c]
-    if apellido_cols and nombre_cols:
-        canonical['apellidos'] = df[apellido_cols[0]].apply(normalize_name)
-        canonical['nombres'] = df[nombre_cols[0]].apply(normalize_name)
-    else:
-        # fallback: primer posible name column
-        if possible_name_cols:
-            parts = df[possible_name_cols[0]].str.split(n=1, expand=True)
-            canonical['apellidos'] = parts[0].apply(normalize_name)
-            canonical['nombres'] = parts[1].fillna('').apply(normalize_name)
-        else:
-            canonical['apellidos'] = ''
-            canonical['nombres'] = ''
-
-    # Otras columnas heurísticas
-    for heur in ['municipio', 'recinto', 'mesa', 'tipo']:
-        candidates = [c for c in df.columns if heur in c]
-        canonical[heur] = df[candidates[0]] if candidates else ''
-
-    canonical['source_csv'] = input_csv
-    canonical['source_pdf'] = source_pdf or ''
-    canonical['pdf_date'] = pd.to_datetime(pdf_date) if pdf_date is not None else parse_date_from_filename(Path(input_csv).stem)
-    # guardar
     if output_csv is None:
-        output_csv = CLEAN_DIR / f"{Path(input_csv).stem}_clean.csv"
-    canonical.to_csv(output_csv, index=False)
-    print(f"Limpieza completada -> {output_csv}")
-    return str(output_csv)
+        input_path = Path(input_csv)
+        output_csv = CLEAN_DIR / f"cleaned_{input_path.name}"
 
+    df.to_csv(output_csv, index=False, encoding='utf-8')
+    print(f"Archivo limpio guardado en: {output_csv}")
+
+    return df
 
 if __name__ == "__main__":
-    import sys
-    if len(sys.argv) < 2:
-        print("Uso: python clean_data.py <input_csv> [source_pdf] [pdf_date]")
-        sys.exit(1)
-    input_csv = sys.argv[1]
-    source_pdf = sys.argv[2] if len(sys.argv) > 2 else None
-    print(source_pdf)
-    pdf_date = sys.argv[3] if len(sys.argv) > 3 else None
-    clean_csv(input_csv, source_pdf=source_pdf, pdf_date=pdf_date)
+    if len(sys.argv) == 1:
+        print("Solo un argumento. Colocar los argumentos correctos, ver .README")
+    else:
+        if len(sys.argv) < 2:
+            print("Uso: python clean_data.py <input_csv> [source_pdf] [pdf_date]")
+            print("O: python clean_data.py (para ejecutar pruebas)")
+            sys.exit(1)
+        
+        input_csv = sys.argv[1]
+        source_pdf = sys.argv[2] if len(sys.argv) > 2 else None
+        pdf_date = sys.argv[3] if len(sys.argv) > 3 else None
+        
+        print(f"🔧 Procesando archivo: {input_csv}")
+        if source_pdf:
+            print(f"📄 PDF fuente: {source_pdf}")
+        if pdf_date:
+            print(f"📅 Fecha PDF: {pdf_date}")
+        
+        clean_csv(input_csv, source_pdf=source_pdf, pdf_date=pdf_date)
