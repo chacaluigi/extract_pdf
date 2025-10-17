@@ -5,6 +5,10 @@ from src.utils import ensure_dir, normalize_ci, normalize_name, parse_date_from_
 
 CLEAN_DIR = Path(__file__).resolve().parents[1] / "data" / "cleaned"
 
+def process_data(df):
+    processed_df=df.copy()
+    processed_df["DOCUMENTO"]=processed_df['DOCUMENTO'].str.replace(r'^[I\-]\s*','', regex=True)
+
 def clean_csv(input_csv: str, output_csv: str = None, source_pdf=None, pdf_date=None):
     ensure_dir(CLEAN_DIR)
     df = pd.read_csv(input_csv, dtype=str, keep_default_na=False)

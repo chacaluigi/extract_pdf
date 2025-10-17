@@ -14,6 +14,22 @@ python -m src.extract_tables data/raw/2019-10-20-Elecciones-Generales-Cochabamba
 python -m src.clean_data data/extracted/2019-10-20-Elecciones-Generales-Cochabamba_table1.csv data/raw/2019-10-20-Elecciones-Generales-Cochabamba.pdf
 
 
+# propiedades camelot
+
+tables = camelot.read_pdf(
+    str(pdf_path),
+    flavor='lattice',
+    copy_text=['h', 'v'],  # Para texto en bordes
+    split_text=True,       # Para dividir texto entre celdas  
+    flag_size=True,        # Para detectar estructura
+    strip_text='\n',       # Para limpiar datos
+    line_scale=40,         # Más sensible a líneas
+    layout_kwargs={'detect_vertical': False}  # A veces ayuda
+)
+
+
+
+
 Package            Version
 ---
 cffi               2.0.0
@@ -30,4 +46,3 @@ pypdfium2          4.30.0
 
 modificar la función de extract_pdf_tables:
 - unir las tablas encontradas de un pdf, en un solo archivo csv, ya que, las tablas de un pdf tienen el mismo encabezado y formato en todas sus páginas. Además que los pdfs tienen cientos de páginas con tablas.
-
