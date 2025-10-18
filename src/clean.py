@@ -2,8 +2,7 @@ import pandas as pd
 from pathlib import Path
 import sys
 
-DATA_BOL_DIR = Path(__file__).parent.parent
-sys.path.insert(0, str(DATA_BOL_DIR))
+DATA_BOL_DIR = Path(__file__).resolve().parents[1] / "data" / "dictionary"
 
 from data.dictionary.data_bolivia import BoliviaData
 
@@ -20,7 +19,7 @@ def separate_last_and_first_names(text):
         print(f'ERROR: EXTRACCIÓN NOMBRE INCORRECTO. El nombre {text} no puede ser menos de 2 palabras.')
         return pd.Series([text, '', ''])
     
-    conectors={'de', 'del', 'la', 'tezanos'}
+    conectors={'de', 'del', 'la', 'tezanos', 'le'}
     processed_parts = []
     i=0
     while i<len(parts):

@@ -16,13 +16,15 @@ def extract_pdf_tables(pdf_path: str, output_dir: str = None, pages="all", flavo
     ensure_dir(output_dir)
 
     print(f"Extrayendo tablas de: {pdf_path} - flavor={flavor} - pages={pages}")
-    tables = camelot.read_pdf(str(pdf_path), pages=pages, flavor=flavor, split_text=True,flag_size=True)
+    tables = camelot.read_pdf(str(pdf_path), pages=pages, flavor=flavor, split_text=True, flag_size=True)
     print(f"Tablas encontradas: {len(tables)}")
 
     csv_paths = []
     for i, table in enumerate(tables, start=1):
         out_csv = output_dir / f"{pdf_path.stem}_table{i}.csv"
-        table.df.to_csv(out_csv, index=False)
+        table.df.to_csv(out_csv, index=False, header=False)
+        print(table.df)
+
         csv_paths.append(str(out_csv))
         print(f"guardado {out_csv} (shape={table.df.shape})")
 

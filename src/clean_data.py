@@ -25,7 +25,8 @@ def separate_last_and_first_names(text):
         print(f'ERROR: EXTRACCIÓN NOMBRE INCORRECTO. El nombre {text} no puede ser menos de 2 palabras.')
         return pd.Series([text, '', ''])
     
-    conectors={'de', 'del', 'la', 'tezanos'}
+    conectors={'de', 'del', 'la', 'tezanos', 'le'}
+
     processed_parts = []
     i=0
     while i<len(parts):

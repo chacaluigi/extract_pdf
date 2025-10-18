@@ -46,4 +46,5 @@ class BoliviaData:
         "VASQUEZ JHILDA NELIDA",
         " VEGA ELIZABETH BETTY",
         "VEGA ERICK ARIEL",
+        "LE TONQUEZE GUILLAUME JACQUES PHILIPPE"
     ]
