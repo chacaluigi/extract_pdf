@@ -2,9 +2,10 @@ PROYECTO DE EXTRACCIÓN DE PDFS
 - pylint, flakeo ruff?
 - Un colegio puede tener filiales en varios municipios.
 - Un municipio puede tener varios colegios.
-# desinstalar java y Tabula-py junto a todo sus archivos residuales y cache en WSL. Después instalar camelot-py
-- Subir proyecto en venv Ubuntu a git hub.
-
+## desinstalar java y Tabula-py junto a todo sus archivos residuales y cache en WSL. Después instalar camelot-py
+## Subir proyecto en venv Ubuntu a git hub.
+- quitar los enumeramientos de las columnas en la extracción de la tabla.
+- 
 
 
 # extraer tablas del pdf que subiste (ruta proporcionada por ti):

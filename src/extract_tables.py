@@ -12,10 +12,10 @@ def extract_pdf_tables(pdf_path: str, output_dir: str = None, pages="all", flavo
         output_dir = DATA_DIR / "extracted"
     else:
         output_dir = Path(output_dir)
+    
     ensure_dir(output_dir)
 
-    print(f"Extrayendo tablas de {pdf_path} -> flavor={flavor}, pages={pages}")
-    # Camelot: flavor='lattice' para tablas con líneas; 'stream' para tablas por espacios
+    print(f"Extrayendo tablas de: {pdf_path} - flavor={flavor} - pages={pages}")
     tables = camelot.read_pdf(str(pdf_path), pages=pages, flavor=flavor, split_text=True,flag_size=True)
     print(f"Tablas encontradas: {len(tables)}")
 
@@ -24,11 +24,9 @@ def extract_pdf_tables(pdf_path: str, output_dir: str = None, pages="all", flavo
         out_csv = output_dir / f"{pdf_path.stem}_table{i}.csv"
         table.df.to_csv(out_csv, index=False)
         csv_paths.append(str(out_csv))
-        print(f"  -> Guardado {out_csv} (shape={table.df.shape})")
+        print(f"guardado {out_csv} (shape={table.df.shape})")
 
-    # metadata: fecha (si existe) y archivo fuente
     pdf_date = parse_date_from_filename(str(pdf_path))
-    print(pdf_date)
     return {"pdf": str(pdf_path), "pdf_date": pdf_date, "csvs": csv_paths}
 
 

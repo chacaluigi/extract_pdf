@@ -4,8 +4,7 @@ from src.utils import ensure_dir, normalize_ci, normalize_name, parse_date_from_
 import sys
 
 CLEAN_DIR = Path(__file__).resolve().parents[1] / "data" / "cleaned"
-DATA_BOL_DIR = Path(__file__).parent.parent
-sys.path.insert(0, str(DATA_BOL_DIR))
+DATA_BOL_DIR = Path(__file__).resolve().parents[1] / "data" / "dictionary"
 
 from data.dictionary.data_bolivia import BoliviaData
 nombres_bolivia = BoliviaData.NOMBRES
@@ -78,7 +77,6 @@ def clean_csv(input_csv: str, output_csv: str = None, source_pdf=None, pdf_date=
         df[['APELLIDO_PATERNO', 'APELLIDO_MATERNO', 'NOMBRES']] = nombre_split
 
         df = df.drop('APELLIDOS Y NOMBRES', axis=1)
-        print("✅ Columna 'APELLIDOS Y NOMBRES' separada y eliminada")
 
     if source_pdf:
         df['FUENTE_PDF'] = source_pdf
@@ -92,7 +90,7 @@ def clean_csv(input_csv: str, output_csv: str = None, source_pdf=None, pdf_date=
 
     if output_csv is None:
         input_path = Path(input_csv)
-        output_csv = CLEAN_DIR / f"cleaned_{input_path.name}"
+        output_csv = CLEAN_DIR / f"{input_path.name}_clean.csv"
 
     df.to_csv(output_csv, index=False, encoding='utf-8')
     print(f"Archivo limpio guardado en: {output_csv}")
