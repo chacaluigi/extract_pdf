@@ -23,8 +23,6 @@ def extract_pdf_tables(pdf_path: str, output_dir: str = None, pages="all", flavo
     for i, table in enumerate(tables, start=1):
         out_csv = output_dir / f"{pdf_path.stem}_table{i}.csv"
         table.df.to_csv(out_csv, index=False, header=False)
-        print(table.df)
-
         csv_paths.append(str(out_csv))
         print(f"guardado {out_csv} (shape={table.df.shape})")
 

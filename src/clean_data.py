@@ -77,7 +77,20 @@ def clean_csv(input_csv: str, output_csv: str = None, source_pdf=None, pdf_date=
         nombre_split = df['APELLIDOS Y NOMBRES'].apply(separate_last_and_first_names)
         df[['APELLIDO_PATERNO', 'APELLIDO_MATERNO', 'NOMBRES']] = nombre_split
 
-        df = df.drop('APELLIDOS Y NOMBRES', axis=1)
+        original_columns = df.columns.tolist()
+        col_position = original_columns.index('APELLIDOS Y NOMBRES')
+
+        df = df.drop(columns='APELLIDOS Y NOMBRES')
+
+        new_columns = df.columns.tolist()
+
+        columns_to_move = ['APELLIDO_PATERNO', 'APELLIDO_MATERNO', 'NOMBRES']
+        
+        for col in columns_to_move:
+            new_columns.remove(col)
+
+        new_columns[col_position:col_position] = columns_to_move
+        df = df[new_columns]
 
     if source_pdf:
         df['FUENTE_PDF'] = source_pdf
