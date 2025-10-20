@@ -42,7 +42,7 @@ def clean_csv(input_csv: str, output_csv: str = None, source_pdf=None, pdf_date=
 
     if output_csv is None:
         input_path = Path(input_csv)
-        output_csv = CLEAN_DIR / f"{input_path.name}_clean.csv"
+        output_csv = CLEAN_DIR / f"{input_path.stem}_clean.csv"
 
     df.to_csv(output_csv, index=False, encoding='utf-8')
     print(f"Archivo limpio guardado en: {output_csv}")

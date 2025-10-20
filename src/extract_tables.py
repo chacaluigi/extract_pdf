@@ -37,7 +37,9 @@ def extract_pdf_tables(pdf_path: str, output_dir: str = None, pages="all", flavo
         csv_paths.append(str(combined_csv))
         print(f"guardado: {combined_csv}  Dimensiones: {combined_df.shape[0]} filas × {combined_df.shape[1]} columnas")
 
-    return {"pdf": str(pdf_path), "csvs": csv_paths}
+        pdf_date = parse_date_from_filename(str(pdf_path))
+
+    return {"pdf": str(pdf_path),"pdf_date": pdf_date, "csvs": csv_paths}
 
 
 if __name__ == "__main__":

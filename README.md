@@ -14,6 +14,8 @@ python -m src.extract_tables data/raw/2019-10-20-Elecciones-Generales-Cochabamba
 # limpiar una tabla extraída
 python -m src.clean_data data/extracted/2019-10-20-Elecciones-Generales-Cochabamba_table1.csv data/raw/2019-10-20-Elecciones-Generales-Cochabamba.pdf
 
+# ejecutar cli.py
+python -m src.cli extract ./data/raw/2019-10-20-Elecciones-Generales-Cochabamba.pdf 1-3 lattice
 
 # propiedades camelot
 

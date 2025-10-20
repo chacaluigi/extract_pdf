@@ -1,6 +1,5 @@
 import pandas as pd
 from pathlib import Path
-import sys
 
 DATA_BOL_DIR = Path(__file__).resolve().parents[1] / "data" / "dictionary"
 
@@ -71,5 +70,4 @@ def probar_casos_especiales():
         print(f"NOMBRES:  {nom}")
         print("-" * 50)
 
-# Probar la función
 probar_casos_especiales()

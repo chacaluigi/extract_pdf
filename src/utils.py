@@ -8,7 +8,7 @@ def ensure_dir(p):
     Path(p).mkdir(parents=True, exist_ok=True)
 
 def parse_date_from_filename(filename: str):
-    """Intenta extraer fecha YYYYMMDD o YYYY-MM-DD del nombre de archivo."""
+    #intenta extraer fecha YYYYMMDD o YYYY-MM-DD del nombre de archivo.
     m = re.search(r'(\d{4})[-_]?(\d{2})[-_]?(\d{2})', filename)
     if m:
         return datetime(int(m.group(1)), int(m.group(2)), int(m.group(3))).date()
