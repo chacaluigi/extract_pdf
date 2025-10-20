@@ -1,6 +1,6 @@
 import pandas as pd
 from pathlib import Path
-from src.utils import ensure_dir, parse_date_from_filename, normalize_ci_document, separate_last_and_first_names
+from src.utils import ensure_dir, parse_date_from_filename, normalize_document, separate_last_and_first_names
 import sys
 
 CLEAN_DIR = Path(__file__).resolve().parents[1] / "data" / "cleaned"
@@ -9,26 +9,23 @@ def clean_csv(input_csv: str, output_csv: str = None, source_pdf=None, pdf_date=
     
     ensure_dir(CLEAN_DIR)
     df = pd.read_csv(input_csv, dtype=str, keep_default_na=False)
-    df = normalize_ci_document(df)
 
     if 'APELLIDOS Y NOMBRES' in df.columns:
-        nombre_split = df['APELLIDOS Y NOMBRES'].apply(separate_last_and_first_names)
-        df[['APELLIDO_PATERNO', 'APELLIDO_MATERNO', 'NOMBRES']] = nombre_split
-
-        original_columns = df.columns.tolist()
-        col_position = original_columns.index('APELLIDOS Y NOMBRES')
-
+        split_name = df['APELLIDOS Y NOMBRES'].apply(separate_last_and_first_names)
+        df[['APELLIDO_PATERNO', 'APELLIDO_MATERNO', 'NOMBRES']] = split_name
         df = df.drop(columns='APELLIDOS Y NOMBRES')
-
-        new_columns = df.columns.tolist()
-
-        columns_to_move = ['APELLIDO_PATERNO', 'APELLIDO_MATERNO', 'NOMBRES']
-        
-        for col in columns_to_move:
-            new_columns.remove(col)
-
-        new_columns[col_position:col_position] = columns_to_move
-        df = df[new_columns]
+    
+    if 'DOCUMENTO' in df.columns:
+        split_document = df['DOCUMENTO'].apply(normalize_document)
+        df[['TIPO', 'DOC_NUMBER', 'COMP']] = split_document
+        df = df.drop(columns='DOCUMENTO')
+        df = df.rename(columns={'DOC_NUMBER': 'DOCUMENTO'})
+    
+    end_columns = ['MUNICIPIO', 'RECINTO', 'MESA']
+    all_columns = df.columns.tolist()
+    first_columns = [col for col in all_columns if col not in end_columns]
+    new_columns = first_columns + end_columns
+    df = df[new_columns]
 
     if source_pdf:
         df['FUENTE_PDF'] = source_pdf

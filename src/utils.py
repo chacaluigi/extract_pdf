@@ -14,10 +14,29 @@ def parse_date_from_filename(filename: str):
         return datetime(int(m.group(1)), int(m.group(2)), int(m.group(3))).date()
     return None
 
-def normalize_ci_document(df):
+
+def normalize_document(doc_text):
+    complement=''
+    if pd.isna(doc_text):
+        return pd.Series(['','',''])
+    
+    parts=str(doc_text).strip().split('-', 1)
+
+    if parts[0].upper() == 'I':
+        doc_type='C.I.'
+    elif parts[0].upper() == 'P':
+        doc_type='PAS.'
+    else:
+        doc_type=parts[0]
+
+    doc_number=parts[1]
+    
+    return pd.Series([doc_type, doc_number, complement]) 
+
+""" def normalize_document(df):
     processed_df=df.copy()
     processed_df["DOCUMENTO"]=processed_df['DOCUMENTO'].str.replace(r'^I\-\s*','', regex=True)
-    return processed_df
+    return processed_df """
 
 from data.dictionary.data_bolivia import BoliviaData
 nombres_bolivia = BoliviaData.NOMBRES

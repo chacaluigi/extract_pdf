@@ -7,8 +7,28 @@ from data.dictionary.data_bolivia import BoliviaData
 
 nombres_bolivia = BoliviaData.NOMBRES
 casos_prueba = BoliviaData.NOMBRES_PRUEBA
+docs_prueba = BoliviaData.DOCUMENTOS_PRUEBA
+
+def normalize_document(doc_text):
+    complement=''
+    if pd.isna(doc_text):
+        return pd.Series(['','',''])
+    
+    parts=str(doc_text).strip().split('-', 1)
+
+    if parts[0].upper() == 'I':
+        doc_type='C.I.'
+    elif parts[0].upper() == 'P':
+        doc_type='PAS.'
+    else:
+        doc_type=parts[0]
+
+    doc_number=parts[1]
+    
+    return pd.Series([doc_type, doc_number, complement]) 
 
 def separate_last_and_first_names(text):
+    
     if pd.isna(text):
         return pd.Series(['','',''])
     
@@ -59,15 +79,25 @@ def separate_last_and_first_names(text):
     
     return pd.Series([pat_surname, mat_surname, names])
 
+
+
 def probar_casos_especiales():
     print("PRUEBA DE CASOS ESPECIALES:")
     print("=" * 80)
-    for caso in casos_prueba:
+    """ for caso in casos_prueba:
         pat, mat, nom = separate_last_and_first_names(caso)
         print(f"ORIGINAL: {caso}")
         print(f"PATERNO:  {pat}")
         print(f"MATERNO:  {mat}") 
         print(f"NOMBRES:  {nom}")
+        print("-" * 50) """
+
+    for doc in docs_prueba:
+        doc_type, doc_number, comp = normalize_document(doc)
+        print(f"ORIGINAL: {doc}")
+        print(f"type:     {doc_type}")
+        print(f"number:   {doc_number}") 
+        print(f"comp:     {comp}")
         print("-" * 50)
 
 probar_casos_especiales()
