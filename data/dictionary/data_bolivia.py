@@ -1,4 +1,3 @@
-
 class BoliviaData:
     NOMBRES = ["ERICK", "ELIZABETH", "JHILDA", "IRMA", "LEONIDAS", "RIDER", "LIDER","LUZ","JHON","JHONNY","MARY",
         "MARIA", "JOSE", "LUIS", "JUAN", "CARLOS", "ANA", "PEDRO", "MANUEL", "JORGE", "ANTONIO",

@@ -1,7 +1,7 @@
 # src/cli.py
 import sys
 from src.extract_tables import extract_pdf_tables
-#from src.clean_data import clean_csv
+from src.clean_data import clean_csv
 #from src.dedupe_merge import load_all_cleaned, dedupe_keep_latest
 #from src.db.loader import create_tables, upsert_dataframe
 #from src.db.models import Jurado
@@ -10,8 +10,8 @@ import pandas as pd
 def run_pipeline_for_pdf(pdf_path):
     res = extract_pdf_tables(pdf_path)
     csvs = res['csvs']
-    """ for csv in csvs:
-        clean_csv(csv, source_pdf=res['pdf'], pdf_date=res['pdf_date']) """
+    for csv in csvs:
+        clean_csv(csv, source_pdf=res['pdf'], pdf_date=res['pdf_date'])
 
 def run_all_and_load():
     # merge & dedupe

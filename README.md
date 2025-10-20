@@ -4,8 +4,8 @@ PROYECTO DE EXTRACCIÓN DE PDFS
 - Un municipio puede tener varios colegios.
 ## desinstalar java y Tabula-py junto a todo sus archivos residuales y cache en WSL. Después instalar camelot-py
 ## Subir proyecto en venv Ubuntu a git hub.
-- quitar los enumeramientos de las columnas en la extracción de la tabla.
-- 
+## quitar los enumeramientos de las columnas en la extracción de la tabla.
+## modificar la función de extract_pdf_tables: unir las tablas encontradas de un pdf, en un solo archivo csv, ya que, las tablas de un pdf tienen el mismo encabezado y formato en todas sus páginas. Además que los pdfs tienen cientos de páginas con tablas.
 
 
 # extraer tablas del pdf que subiste (ruta proporcionada por ti):
@@ -45,5 +45,4 @@ PyPDF2             3.0.1
 pypdfium2          4.30.0
 
 
-modificar la función de extract_pdf_tables:
-- unir las tablas encontradas de un pdf, en un solo archivo csv, ya que, las tablas de un pdf tienen el mismo encabezado y formato en todas sus páginas. Además que los pdfs tienen cientos de páginas con tablas.
+

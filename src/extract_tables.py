@@ -1,4 +1,4 @@
-import os
+import pandas as pd
 import sys
 from pathlib import Path
 import camelot
@@ -20,14 +20,24 @@ def extract_pdf_tables(pdf_path: str, output_dir: str = None, pages="all", flavo
     print(f"Tablas encontradas: {len(tables)}")
 
     csv_paths = []
-    for i, table in enumerate(tables, start=1):
-        out_csv = output_dir / f"{pdf_path.stem}_table{i}.csv"
-        table.df.to_csv(out_csv, index=False, header=False)
-        csv_paths.append(str(out_csv))
-        print(f"guardado {out_csv} (shape={table.df.shape})")
 
-    pdf_date = parse_date_from_filename(str(pdf_path))
-    return {"pdf": str(pdf_path), "pdf_date": pdf_date, "csvs": csv_paths}
+    if len(tables) > 0:
+        all_dataframes = []
+
+        for i, table in enumerate(tables, start=1):
+            if i == 1:
+                all_dataframes.append(table.df)
+            else:
+                all_dataframes.append(table.df.iloc[1:])
+        
+        combined_df = pd.concat(all_dataframes, ignore_index=True)
+
+        combined_csv = output_dir / f"{pdf_path.stem}_combined.csv"
+        combined_df.to_csv(combined_csv, index=False, header=False)
+        csv_paths.append(str(combined_csv))
+        print(f"guardado: {combined_csv}  Dimensiones: {combined_df.shape[0]} filas × {combined_df.shape[1]} columnas")
+
+    return {"pdf": str(pdf_path), "csvs": csv_paths}
 
 
 if __name__ == "__main__":
@@ -38,4 +48,3 @@ if __name__ == "__main__":
     pages = sys.argv[2] if len(sys.argv) > 2 else "all"
     flavor = sys.argv[3] if len(sys.argv) > 3 else "stream"
     res = extract_pdf_tables(pdf, pages=pages, flavor=flavor)
-    print(res)
