@@ -2,18 +2,19 @@ import pdfplumber
 
 def extract_pdf_pdfplumber(pdf_file):
     with pdfplumber.open(pdf_file) as pdf:
-    
-        page=pdf.pages[1]
-        area=page.crop((0, 0.15*float(page.height), page.width, 0.95*float(page.height)))
+        page=pdf.pages[6]
+        area=page.crop((0, 0, 1/3*float(page.width), page.height))
+        #area=page.crop((1/3*float(page.width), 0, 2*1/3*float(page.width), page.height))
         im=area.to_image(resolution=150)
-        im.save("area.png", format="PNG")
-        
+        im.save("area1.png", format="PNG")
     return area
 
-salida=extract_pdf_pdfplumber("data/raw/2019-10-20-Elecciones-Generales-Cochabamba.pdf")
+salida=extract_pdf_pdfplumber("data/raw/2020-10-18-Elecciones-Generales-Cochabamba.pdf")
 print(salida)
 
+#area=page.crop((0, 0, 0.33*float(page.width), page.height))
 
+#area=page.crop((0, 0.15*float(page.height), page.width, 0.95*float(page.height)))
 
 """ if end is None or end>total_pages:
             end=total_pages
@@ -27,13 +28,6 @@ print(salida)
         for page_num in range(start, end):
             page=pdf.pages[page_num]
             table=page.extract_table() """
-
-
-
-
-
-
-
 
 """ def extract_text_pypdf2(pdf_file, start=0, end=None):
     with open(pdf_file, 'rb') as file:
@@ -55,9 +49,6 @@ print(salida)
     return text
  """
 
-
-
-# Ejemplo de uso
 #texto = extraer_texto_pypdf2("../pdfs/Cochabamba_Lista_EG2V.pdf")
 """ text = extract_text_pypdf2("src/pdfs/Cochabamba_Lista_EG2V.pdf",start=2, end=4)
 

@@ -11,5 +11,4 @@ def extraer_tablas_camelot(archivo_pdf):
         print("-" * 50)
     return tablas
 
-# Ejemplo de uso
 tablas = extraer_tablas_camelot("src/pdfs/JURADOS+ELECTORALES+COCHABAMBA+2025.pdf")

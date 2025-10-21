@@ -6,6 +6,57 @@ from src.utils import ensure_dir, parse_date_from_filename
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 
+def extract_pdf_tables_regions(pdf_path: str, output_dir: str = None, pages="all", flavor="stream"):
+    pdf_path = Path(pdf_path)
+    if output_dir is None:
+        output_dir = DATA_DIR / "extracted"
+    else:
+        output_dir = Path(output_dir)
+    
+    ensure_dir(output_dir)
+
+    print(f"Extrayendo tablas de: {pdf_path} --- flavor = {flavor} --- pages = {pages}")
+
+    regions = [[0,0,33,100],[33,0,66,100],[66,0,100,100]]
+
+    tables=[]
+
+    for i, region in enumerate(regions, start=1):
+        tables.append(camelot.read_pdf(str(pdf_path), pages=pages, flavor=flavor, split_text=True, flag_size=True, region=region))
+
+    print(f"Cantidad de tablas encontradas: {len(tables)}")
+
+    tables_ordered = []
+
+    for i, table in enumerate(tables, start=1)/3:
+        tables_ordered.append(table)
+        tables_ordered.append(tables[len(tables)/3 + i])
+        tables_ordered.append(tables[len(tables)/3*2 + i])
+
+    tables = tables_ordered
+    
+    csv_paths = []
+
+    if len(tables) > 0:
+        all_dataframes = []
+
+        for i, table in enumerate(tables, start=1):
+            if i == 1:
+                all_dataframes.append(table.df)
+            else:
+                all_dataframes.append(table.df.iloc[1:])
+        
+        combined_df = pd.concat(all_dataframes, ignore_index=True)
+
+        combined_csv = output_dir / f"{pdf_path.stem}_combined.csv"
+        combined_df.to_csv(combined_csv, index=False, header=False)
+        csv_paths.append(str(combined_csv))
+        print(f"guardado en: {combined_csv}  Dimensiones: {combined_df.shape[0]} filas × {combined_df.shape[1]} columnas")
+
+    pdf_date = parse_date_from_filename(str(pdf_path))
+    return {"pdf": str(pdf_path), "pdf_date": pdf_date, "csvs": csv_paths}
+
+
 def extract_pdf_tables(pdf_path: str, output_dir: str = None, pages="all", flavor="stream"):
     pdf_path = Path(pdf_path)
     if output_dir is None:
@@ -15,7 +66,8 @@ def extract_pdf_tables(pdf_path: str, output_dir: str = None, pages="all", flavo
     
     ensure_dir(output_dir)
 
-    print(f"Extrayendo tablas de: {pdf_path} - flavor={flavor} - pages={pages}")
+    print(f"Extrayendo tablas de: {pdf_path} --- flavor = {flavor} --- pages = {pages}")
+
     tables = camelot.read_pdf(str(pdf_path), pages=pages, flavor=flavor, split_text=True, flag_size=True)
     print(f"Tablas encontradas: {len(tables)}")
 
@@ -35,11 +87,10 @@ def extract_pdf_tables(pdf_path: str, output_dir: str = None, pages="all", flavo
         combined_csv = output_dir / f"{pdf_path.stem}_combined.csv"
         combined_df.to_csv(combined_csv, index=False, header=False)
         csv_paths.append(str(combined_csv))
-        print(f"guardado: {combined_csv}  Dimensiones: {combined_df.shape[0]} filas × {combined_df.shape[1]} columnas")
+        print(f"guardado en: {combined_csv}  Dimensiones: {combined_df.shape[0]} filas × {combined_df.shape[1]} columnas")
 
-        pdf_date = parse_date_from_filename(str(pdf_path))
-
-    return {"pdf": str(pdf_path),"pdf_date": pdf_date, "csvs": csv_paths}
+    pdf_date = parse_date_from_filename(str(pdf_path))
+    return {"pdf": str(pdf_path), "pdf_date": pdf_date, "csvs": csv_paths}
 
 
 if __name__ == "__main__":
@@ -49,4 +100,5 @@ if __name__ == "__main__":
     pdf = sys.argv[1]
     pages = sys.argv[2] if len(sys.argv) > 2 else "all"
     flavor = sys.argv[3] if len(sys.argv) > 3 else "stream"
-    res = extract_pdf_tables(pdf, pages=pages, flavor=flavor)
+    #res = extract_pdf_tables(pdf, pages=pages, flavor=flavor)
+    res = extract_pdf_tables_regions(pdf, pages=pages, flavor=flavor)

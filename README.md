@@ -9,8 +9,9 @@ PROYECTO DE EXTRACCIÓN DE PDFS
 - Tipos de documentos
 - Extraer el 2do pdf
 
-# extraer tablas del pdf que subiste (ruta proporcionada por ti):
+# extraer tablas del pdf
 python -m src.extract_tables data/raw/2019-10-20-Elecciones-Generales-Cochabamba.pdf 1-3 lattice
+python -m src.extract_tables data/raw/2020-10-18-Elecciones-Generales-Cochabamba.pdf 5-6 lattice
 
 # limpiar una tabla extraída
 python -m src.clean_data data/extracted/2019-10-20-Elecciones-Generales-Cochabamba_table1.csv data/raw/2019-10-20-Elecciones-Generales-Cochabamba.pdf
