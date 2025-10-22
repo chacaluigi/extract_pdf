@@ -12,7 +12,30 @@ def extract_dimensions_page(pdf_file, page_number):
         page = pdf.pages[page_number+1]
     return page.width, page.height
 
-def extract_pdf_tables_regions(pdf_path: str, output_dir: str = None, pages="all", flavor="stream"):
+def repair_broken_rows_simple(table_list):
+    for table in table_list:
+        df = table.df.fillna('')  # reemplaza NaN con strings vacíos
+        repaired_rows = []
+        
+        for _, row in df.iterrows():
+            # se convierte a strings y se limpia
+            row = [str(cell).strip() for cell in row]
+            
+            #si la primera columna vacía y hay filas anteriores
+            if row[0] == '' and repaired_rows:
+                # se une con ultima fila
+                last_row = repaired_rows[-1]
+                for i in range(len(row)):
+                    if row[i] != '':
+                        last_row[i] = (last_row[i] + ' ' + row[i]).strip()
+            else:
+                repaired_rows.append(row)
+        
+        table.df = pd.DataFrame(repaired_rows)
+    
+    return table_list
+
+def extract_pdf_tables_areas(pdf_path: str, output_dir: str = None, pages="all", flavor="stream"):
     pdf_path = Path(pdf_path)
     if output_dir is None:
         output_dir = DATA_DIR / "extracted"
@@ -32,10 +55,11 @@ def extract_pdf_tables_regions(pdf_path: str, output_dir: str = None, pages="all
     ]
 
     tables=[]
-
-    for i, table_areas in enumerate(table_areas_list, start=1):
+    
+    for _, table_areas in enumerate(table_areas_list):
         table_list = camelot.read_pdf(str(pdf_path), pages=pages, flavor=flavor, split_text=True, flag_size=True, table_areas=table_areas)
-        tables.extend(table_list)
+        repaired_tables = repair_broken_rows_simple(table_list)
+        tables.extend(repaired_tables)
 
     print(f"Cantidad de tablas encontradas: {len(tables)}")
 
@@ -56,7 +80,7 @@ def extract_pdf_tables_regions(pdf_path: str, output_dir: str = None, pages="all
         
         combined_df = pd.concat(all_dataframes, ignore_index=True)
 
-        combined_csv = output_dir / f"{pdf_path.stem}_combined.csv"
+        combined_csv = output_dir / f"{pages}___{pdf_path.stem}.csv"
         combined_df.to_csv(combined_csv, index=False, header=False)
         csv_paths.append(str(combined_csv))
         print(f"guardado en: {combined_csv}  Dimensiones: {combined_df.shape[0]} filas × {combined_df.shape[1]} columnas")
@@ -109,4 +133,4 @@ if __name__ == "__main__":
     pages = sys.argv[2] if len(sys.argv) > 2 else "all"
     flavor = sys.argv[3] if len(sys.argv) > 3 else "stream"
     #res = extract_pdf_tables(pdf, pages=pages, flavor=flavor)
-    res = extract_pdf_tables_regions(pdf, pages=pages, flavor=flavor)
+    res = extract_pdf_tables_areas(pdf, pages=pages, flavor=flavor)

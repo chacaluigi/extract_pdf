@@ -1,18 +1,18 @@
 import pdfplumber
 
-def extract_dimensions_page(pdf_file, page):
+def extract_dimensions_page(pdf_file, page_number):
     with pdfplumber.open(pdf_file) as pdf:
-        page = pdf.pages[page]
+        page = pdf.pages[page_number]
     return page.width, page.height
 
-def extract_pdf_pdfplumber(pdf_file):
+def extract_pdf_pdfplumber(pdf_file, page_number):
     with pdfplumber.open(pdf_file) as pdf:
-        page=pdf.pages[6]
+        page=pdf.pages[page_number-1]
         #area=page.crop((0, 0, 33, 100))
-        area=page.crop((1/3*float(page.width), 0, 2*1/3*float(page.width), page.height))
+        area=page.crop((0, 0, 0.33*float(page.width), page.height))
         print(f'ancho: {page.width}, alto: {page.height}')
         im=area.to_image(resolution=150)
-        im.save("area1.png", format="PNG")
+        im.save(f"area{page_number}.png", format="PNG")
     return area
 
 #salida=extract_pdf_pdfplumber("data/raw/2020-10-18-Elecciones-Generales-Cochabamba.pdf")
@@ -20,6 +20,10 @@ def extract_pdf_pdfplumber(pdf_file):
 
 w, h = extract_dimensions_page("data/raw/2020-10-18-Elecciones-Generales-Cochabamba.pdf", 6)
 print(f'ancho: {w}, alto: {h}')
+a=extract_pdf_pdfplumber("data/raw/2020-10-18-Elecciones-Generales-Cochabamba.pdf", 6)
+
+
+
 
 #area=page.crop((0, 0, 0.33*float(page.width), page.height))
 
