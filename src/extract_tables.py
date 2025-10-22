@@ -1,10 +1,16 @@
 import pandas as pd
+import pdfplumber
 import sys
 from pathlib import Path
 import camelot
 from src.utils import ensure_dir, parse_date_from_filename
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
+
+def extract_dimensions_page(pdf_file, page_number):
+    with pdfplumber.open(pdf_file) as pdf:
+        page = pdf.pages[page_number+1]
+    return page.width, page.height
 
 def extract_pdf_tables_regions(pdf_path: str, output_dir: str = None, pages="all", flavor="stream"):
     pdf_path = Path(pdf_path)
@@ -17,21 +23,23 @@ def extract_pdf_tables_regions(pdf_path: str, output_dir: str = None, pages="all
 
     print(f"Extrayendo tablas de: {pdf_path} --- flavor = {flavor} --- pages = {pages}")
 
-    regions = [[0,0,33,100],[33,0,66,100],[66,0,100,100]]
+    page_width, page_height = extract_dimensions_page(pdf_path, 6)
+
+    table_areas_list = [
+        [f'0,0,{1/3*float(page_width)},{page_height}'],
+        [f'{1/3*float(page_width)},0,{2/3*float(page_width)},{page_height}'],
+        [f'{2/3*float(page_width)},0,{page_width},{page_height}']
+    ]
 
     tables=[]
 
-    for i, region in enumerate(regions, start=1):
-        tables.append(camelot.read_pdf(str(pdf_path), pages=pages, flavor=flavor, split_text=True, flag_size=True, region=region))
+    for i, table_areas in enumerate(table_areas_list, start=1):
+        table_list = camelot.read_pdf(str(pdf_path), pages=pages, flavor=flavor, split_text=True, flag_size=True, table_areas=table_areas)
+        tables.extend(table_list)
 
     print(f"Cantidad de tablas encontradas: {len(tables)}")
 
-    tables_ordered = []
-
-    for i, table in enumerate(tables, start=1)/3:
-        tables_ordered.append(table)
-        tables_ordered.append(tables[len(tables)/3 + i])
-        tables_ordered.append(tables[len(tables)/3*2 + i])
+    tables_ordered = [tables[i] for start in range(3) for i in range(start, len(tables), 3)]
 
     tables = tables_ordered
     
