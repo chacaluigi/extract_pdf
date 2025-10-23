@@ -3,9 +3,29 @@ import pdfplumber
 import sys
 from pathlib import Path
 import camelot
+import math
 from src.utils import ensure_dir, parse_date_from_filename
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
+
+def join_tables_csv(tables, pdf_path, output_dir):
+    csv_paths = []
+
+    if len(tables) > 0:
+        all_dataframes = []
+
+        for i, table in enumerate(tables, start=1):
+            if i == 1:
+                all_dataframes.append(table.df)
+            else:
+                all_dataframes.append(table.df.iloc[1:])
+        
+        combined_df = pd.concat(all_dataframes, ignore_index=True)
+        combined_csv = output_dir / f"{pages}___{pdf_path.stem}.csv"
+        combined_df.to_csv(combined_csv, index=False, header=False)
+        csv_paths.append(str(combined_csv))
+        print(f"guardado en: {combined_csv}  Dimensiones: {combined_df.shape[0]} filas × {combined_df.shape[1]} columnas")
+    return csv_paths
 
 def extract_dimensions_page(pdf_file, page_number):
     with pdfplumber.open(pdf_file) as pdf:
@@ -62,28 +82,23 @@ def extract_pdf_tables_areas(pdf_path: str, output_dir: str = None, pages="all",
         tables.extend(repaired_tables)
 
     print(f"Cantidad de tablas encontradas: {len(tables)}")
+    
+    cols = 3
+    reason = math.ceil(len(tables)/cols)
 
-    tables_ordered = [tables[i] for start in range(3) for i in range(start, len(tables), 3)]
+    tables_ordered = [tables[j] for i in range(reason) for j in range(i, len(tables), reason)]
 
     tables = tables_ordered
+    print('Primera tabla')
+    print(tables[0].df)
+    print('segunda tabla')
+    print(tables[1].df)
+    print('tercera tabla')
+    print(tables[2].df)
+    print('cuarta tabla')
+    print(tables[3].df)
     
-    csv_paths = []
-
-    if len(tables) > 0:
-        all_dataframes = []
-
-        for i, table in enumerate(tables, start=1):
-            if i == 1:
-                all_dataframes.append(table.df)
-            else:
-                all_dataframes.append(table.df.iloc[1:])
-        
-        combined_df = pd.concat(all_dataframes, ignore_index=True)
-
-        combined_csv = output_dir / f"{pages}___{pdf_path.stem}.csv"
-        combined_df.to_csv(combined_csv, index=False, header=False)
-        csv_paths.append(str(combined_csv))
-        print(f"guardado en: {combined_csv}  Dimensiones: {combined_df.shape[0]} filas × {combined_df.shape[1]} columnas")
+    csv_paths = join_tables_csv(tables, pdf_path, output_dir) 
 
     pdf_date = parse_date_from_filename(str(pdf_path))
     return {"pdf": str(pdf_path), "pdf_date": pdf_date, "csvs": csv_paths}
@@ -91,6 +106,7 @@ def extract_pdf_tables_areas(pdf_path: str, output_dir: str = None, pages="all",
 
 def extract_pdf_tables(pdf_path: str, output_dir: str = None, pages="all", flavor="stream"):
     pdf_path = Path(pdf_path)
+    
     if output_dir is None:
         output_dir = DATA_DIR / "extracted"
     else:
